@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   title: "MindFlow - Tu Bienestar Mental",
   description: "Aplicación de bienestar mental para registro diario y seguimiento de emociones",
   generator: "v0.app",
+  icons: {
+    icon: "/Wellness-app.ico", 
+  },
 }
 
 export default function RootLayout({
@@ -19,6 +22,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
+      <head>
+        <link rel="icon" href="/Wellness-app.ico" />
+      </head>
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <Suspense fallback={null}>{children}</Suspense>
         <Analytics />
