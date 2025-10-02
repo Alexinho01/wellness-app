@@ -227,7 +227,7 @@ const emergencyResources = [
   {
     name: "Chat de Apoyo",
     phone: "WhatsApp: +569 3710 0023",
-    description: "Apoyo psicológico vía chat",
+    description: "Atención en línea de sicólogos a través de whatsapp.",
   },
 ]
 
