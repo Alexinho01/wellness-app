@@ -152,7 +152,7 @@ export default function WellnessApp() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">MindFlow</h1>
+              <h1 className="text-2xl font-bold text-foreground">Wellness</h1>
               <p className="text-sm text-muted-foreground">Tu bienestar mental</p>
             </div>
           </div>
