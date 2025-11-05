@@ -4,13 +4,13 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { Heart, Battery, Moon, Zap, CheckCircle, BarChart3, User, ArrowLeft } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Heart, Battery, Moon, Zap, CheckCircle, BarChart3, User } from "lucide-react"
 import {
   SupportResourceCard,
   ActivityGuide,
   EmergencyResources,
   getSupportResource,
-  supportResources,
 } from "@/components/support-resources"
 import { WeeklyTrends, MonthlyHeatmap, MetricSummary, StreakCounter } from "@/components/trends-visualization"
 import { ReminderSystem } from "@/components/reminder-system"
@@ -37,14 +37,12 @@ const moodEmojis = ["😢", "😕", "😐", "🙂", "😊"]
 const moodLabels = ["Muy mal", "Mal", "Regular", "Bien", "Excelente"]
 
 export default function WellnessApp() {
-  const [currentView, setCurrentView] = useState<
-    "survey" | "confirmation" | "trends" | "profile" | "resources" | "activity"
-  >("survey")
   const [entries, setEntries] = useState<DailyEntry[]>([])
   const [todayEntry, setTodayEntry] = useState<Partial<DailyEntry>>({})
   const [hasCompletedToday, setHasCompletedToday] = useState(false)
   const [currentActivity, setCurrentActivity] = useState<Activity | null>(null)
   const [recommendedResource, setRecommendedResource] = useState<any>(null)
+  const [showActivityView, setShowActivityView] = useState(false)
 
   useEffect(() => {
     // Load entries from localStorage
@@ -83,7 +81,6 @@ export default function WellnessApp() {
     // Get personalized resource recommendation
     const resource = getSupportResource(todayEntry.mood, todayEntry.energy, todayEntry.stress, todayEntry.sleep)
     setRecommendedResource(resource)
-    setCurrentView("confirmation")
   }
 
   const ScaleSelector = ({
@@ -128,207 +125,7 @@ export default function WellnessApp() {
     </div>
   )
 
-  if (currentView === "survey") {
-    return (
-      <div className="min-h-screen bg-background p-4">
-        <div className="max-w-md mx-auto space-y-6">
-          {/* Header */}
-          <div className="text-center space-y-2 pt-8">
-            <h1 className="text-2xl font-bold text-foreground">MindFlow</h1>
-            <p className="text-muted-foreground">¿Cómo te sientes hoy?</p>
-          </div>
-
-          {hasCompletedToday ? (
-            <Card>
-              <CardContent className="pt-6 text-center space-y-4">
-                <CheckCircle className="w-12 h-12 text-primary mx-auto" />
-                <div>
-                  <h3 className="font-semibold text-foreground">¡Ya registraste tu día!</h3>
-                  <p className="text-sm text-muted-foreground">Vuelve mañana para tu próximo registro</p>
-                </div>
-                <div className="flex gap-2">
-                  <Button onClick={() => setCurrentView("trends")} className="flex-1">
-                    Ver tendencias
-                  </Button>
-                  <Button
-                    onClick={() => setCurrentView("resources")}
-                    variant="outline"
-                    className="flex-1 bg-transparent"
-                  >
-                    Recursos
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Registro Diario</CardTitle>
-                <CardDescription>Solo tomará 20 segundos</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <ScaleSelector
-                  value={todayEntry.mood}
-                  onChange={(value) => setTodayEntry({ ...todayEntry, mood: value })}
-                  icon={Heart}
-                  title="Estado emocional"
-                  lowLabel="Mal"
-                  highLabel="Excelente"
-                />
-
-                <ScaleSelector
-                  value={todayEntry.energy}
-                  onChange={(value) => setTodayEntry({ ...todayEntry, energy: value })}
-                  icon={Battery}
-                  title="Nivel de energía"
-                  lowLabel="Agotado"
-                  highLabel="Energético"
-                />
-
-                <ScaleSelector
-                  value={todayEntry.sleep}
-                  onChange={(value) => setTodayEntry({ ...todayEntry, sleep: value })}
-                  icon={Moon}
-                  title="Calidad del sueño"
-                  lowLabel="Muy mal"
-                  highLabel="Perfecto"
-                />
-
-                <ScaleSelector
-                  value={todayEntry.stress}
-                  onChange={(value) => setTodayEntry({ ...todayEntry, stress: value })}
-                  icon={Zap}
-                  title="Nivel de estrés"
-                  lowLabel="Relajado"
-                  highLabel="Muy estresado"
-                />
-
-                <div className="space-y-3">
-                  <h3 className="font-medium text-foreground">Nota opcional</h3>
-                  <Textarea
-                    placeholder="¿Algo más que quieras recordar sobre hoy?"
-                    value={todayEntry.note || ""}
-                    onChange={(e) => setTodayEntry({ ...todayEntry, note: e.target.value })}
-                    className="resize-none"
-                    rows={3}
-                  />
-                </div>
-
-                <Button
-                  onClick={saveEntry}
-                  className="w-full"
-                  disabled={!todayEntry.mood || !todayEntry.energy || !todayEntry.sleep || !todayEntry.stress}
-                >
-                  Guardar registro
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Emergency Resources */}
-          <EmergencyResources />
-
-          {/* Navigation */}
-          <div className="flex justify-center gap-4 pt-4">
-            <Button
-              variant={currentView === "survey" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setCurrentView("survey")}
-            >
-              <Heart className="w-4 h-4 mr-2" />
-              Registro
-            </Button>
-            <Button
-              variant={currentView === "trends" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setCurrentView("trends")}
-            >
-              <BarChart3 className="w-4 h-4 mr-2" />
-              Tendencias
-            </Button>
-            <Button
-              variant={currentView === "profile" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setCurrentView("profile")}
-            >
-              <User className="w-4 h-4 mr-2" />
-              Perfil
-            </Button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (currentView === "confirmation") {
-    return (
-      <div className="min-h-screen bg-background p-4">
-        <div className="max-w-md mx-auto space-y-6 pt-8">
-          <div className="text-center space-y-4">
-            <CheckCircle className="w-16 h-16 text-primary mx-auto" />
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">¡Registro completado!</h1>
-              <p className="text-muted-foreground">Gracias por cuidar tu bienestar</p>
-            </div>
-          </div>
-
-          {recommendedResource && (
-            <SupportResourceCard
-              resource={recommendedResource}
-              onStartActivity={(activity) => {
-                setCurrentActivity(activity)
-                setCurrentView("activity")
-              }}
-            />
-          )}
-
-          <div className="flex gap-3">
-            <Button variant="outline" className="flex-1 bg-transparent" onClick={() => setCurrentView("trends")}>
-              Ver tendencias
-            </Button>
-            <Button variant="outline" className="flex-1 bg-transparent" onClick={() => setCurrentView("survey")}>
-              Volver al inicio
-            </Button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (currentView === "resources") {
-    return (
-      <div className="min-h-screen bg-background p-4">
-        <div className="max-w-md mx-auto space-y-6 pt-8">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => setCurrentView("survey")}>
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Recursos de Apoyo</h1>
-              <p className="text-muted-foreground">Herramientas para tu bienestar</p>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            {supportResources.map((resource) => (
-              <SupportResourceCard
-                key={resource.id}
-                resource={resource}
-                onStartActivity={(activity) => {
-                  setCurrentActivity(activity)
-                  setCurrentView("activity")
-                }}
-              />
-            ))}
-          </div>
-
-          <EmergencyResources />
-        </div>
-      </div>
-    )
-  }
-
-  if (currentView === "activity" && currentActivity) {
+  if (showActivityView && currentActivity) {
     return (
       <div className="min-h-screen bg-background p-4">
         <div className="max-w-md mx-auto pt-8">
@@ -336,11 +133,11 @@ export default function WellnessApp() {
             activity={currentActivity}
             onComplete={() => {
               setCurrentActivity(null)
-              setCurrentView("confirmation")
+              setShowActivityView(false)
             }}
             onBack={() => {
               setCurrentActivity(null)
-              setCurrentView("resources")
+              setShowActivityView(false)
             }}
           />
         </div>
@@ -348,97 +145,205 @@ export default function WellnessApp() {
     )
   }
 
-  if (currentView === "trends") {
-    return (
-      <div className="min-h-screen bg-background p-4">
-        <div className="max-w-md mx-auto space-y-6 pt-8">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => setCurrentView("survey")}>
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="border-b bg-card">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Mis Tendencias</h1>
-              <p className="text-muted-foreground">Análisis de tu bienestar</p>
+              <h1 className="text-2xl font-bold text-foreground">MindFlow</h1>
+              <p className="text-sm text-muted-foreground">Tu bienestar mental</p>
             </div>
           </div>
+        </div>
+      </div>
 
-          {entries.length === 0 ? (
-            <Card>
-              <CardContent className="pt-6 text-center space-y-4">
-                <BarChart3 className="w-12 h-12 text-muted-foreground mx-auto" />
-                <div>
-                  <h3 className="font-semibold text-foreground">Sin datos aún</h3>
-                  <p className="text-sm text-muted-foreground">Completa algunos registros para ver tus tendencias</p>
-                </div>
-                <Button onClick={() => setCurrentView("survey")}>Hacer mi primer registro</Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-6">
-              {/* Progress Summary */}
-              <StreakCounter entries={entries} />
+      {/* Dashboard Layout */}
+      <div className="container mx-auto p-4">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
+          {/* Left Column - Registro & Tendencias */}
+          <div className="space-y-6">
+            <Tabs defaultValue="registro" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="registro">
+                  <Heart className="w-4 h-4 mr-2" />
+                  Registro
+                </TabsTrigger>
+                <TabsTrigger value="tendencias">
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Tendencias
+                </TabsTrigger>
+              </TabsList>
 
-              {/* Metric Summary Cards */}
-              <MetricSummary entries={entries} />
+              {/* Registro Tab */}
+              <TabsContent value="registro" className="space-y-6 mt-6">
+                {hasCompletedToday ? (
+                  <Card>
+                    <CardContent className="pt-6 text-center space-y-4">
+                      <CheckCircle className="w-12 h-12 text-primary mx-auto" />
+                      <div>
+                        <h3 className="font-semibold text-foreground">¡Ya registraste tu día!</h3>
+                        <p className="text-sm text-muted-foreground">Vuelve mañana para tu próximo registro</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Registro Diario</CardTitle>
+                      <CardDescription>¿Cómo te sientes hoy? Solo tomará 20 segundos</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <ScaleSelector
+                        value={todayEntry.mood}
+                        onChange={(value) => setTodayEntry({ ...todayEntry, mood: value })}
+                        icon={Heart}
+                        title="Estado emocional"
+                        lowLabel="Mal"
+                        highLabel="Excelente"
+                      />
 
-              {/* Weekly Trends Chart */}
-              <WeeklyTrends entries={entries} />
+                      <ScaleSelector
+                        value={todayEntry.energy}
+                        onChange={(value) => setTodayEntry({ ...todayEntry, energy: value })}
+                        icon={Battery}
+                        title="Nivel de energía"
+                        lowLabel="Agotado"
+                        highLabel="Energético"
+                      />
 
-              {/* Monthly Heatmap */}
-              <MonthlyHeatmap entries={entries} />
+                      <ScaleSelector
+                        value={todayEntry.sleep}
+                        onChange={(value) => setTodayEntry({ ...todayEntry, sleep: value })}
+                        icon={Moon}
+                        title="Calidad del sueño"
+                        lowLabel="Muy mal"
+                        highLabel="Perfecto"
+                      />
 
-              {/* Insights */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Insights</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 text-sm">
-                    {entries.length >= 7 && (
-                      <p className="text-muted-foreground">
-                        ¡Excelente! Has mantenido el hábito por una semana completa.
-                      </p>
-                    )}
-                    {entries.length >= 30 && (
-                      <p className="text-muted-foreground">
-                        ¡Increíble! Un mes de seguimiento constante te ayudará a identificar patrones importantes.
-                      </p>
-                    )}
-                    {entries.length < 7 && (
-                      <p className="text-muted-foreground">
-                        Continúa registrando para obtener insights más detallados sobre tus patrones de bienestar.
-                      </p>
-                    )}
+                      <ScaleSelector
+                        value={todayEntry.stress}
+                        onChange={(value) => setTodayEntry({ ...todayEntry, stress: value })}
+                        icon={Zap}
+                        title="Nivel de estrés"
+                        lowLabel="Relajado"
+                        highLabel="Muy estresado"
+                      />
+
+                      <div className="space-y-3">
+                        <h3 className="font-medium text-foreground">Nota opcional</h3>
+                        <Textarea
+                          placeholder="¿Algo más que quieras recordar sobre hoy?"
+                          value={todayEntry.note || ""}
+                          onChange={(e) => setTodayEntry({ ...todayEntry, note: e.target.value })}
+                          className="resize-none"
+                          rows={3}
+                        />
+                      </div>
+
+                      <Button
+                        onClick={saveEntry}
+                        className="w-full"
+                        disabled={!todayEntry.mood || !todayEntry.energy || !todayEntry.sleep || !todayEntry.stress}
+                      >
+                        Guardar registro
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Show recommendation after saving */}
+                {recommendedResource && hasCompletedToday && (
+                  <SupportResourceCard
+                    resource={recommendedResource}
+                    onStartActivity={(activity) => {
+                      setCurrentActivity(activity)
+                      setShowActivityView(true)
+                    }}
+                  />
+                )}
+
+                {/* Emergency Resources */}
+                <EmergencyResources />
+              </TabsContent>
+
+              {/* Tendencias Tab */}
+              <TabsContent value="tendencias" className="space-y-6 mt-6">
+                {entries.length === 0 ? (
+                  <Card>
+                    <CardContent className="pt-6 text-center space-y-4">
+                      <BarChart3 className="w-12 h-12 text-muted-foreground mx-auto" />
+                      <div>
+                        <h3 className="font-semibold text-foreground">Sin datos aún</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Completa algunos registros para ver tus tendencias
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Progress Summary */}
+                    <StreakCounter entries={entries} />
+
+                    {/* Metric Summary Cards */}
+                    <MetricSummary entries={entries} />
+
+                    {/* Weekly Trends Chart */}
+                    <WeeklyTrends entries={entries} />
+
+                    {/* Monthly Heatmap */}
+                    <MonthlyHeatmap entries={entries} />
+
+                    {/* Insights */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">Insights</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 text-sm">
+                          {entries.length >= 7 && (
+                            <p className="text-muted-foreground">
+                              ¡Excelente! Has mantenido el hábito por una semana completa.
+                            </p>
+                          )}
+                          {entries.length >= 30 && (
+                            <p className="text-muted-foreground">
+                              ¡Increíble! Un mes de seguimiento constante te ayudará a identificar patrones importantes.
+                            </p>
+                          )}
+                          {entries.length < 7 && (
+                            <p className="text-muted-foreground">
+                              Continúa registrando para obtener insights más detallados sobre tus patrones de bienestar.
+                            </p>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-        </div>
-      </div>
-    )
-  }
-
-  if (currentView === "profile") {
-    return (
-      <div className="min-h-screen bg-background p-4">
-        <div className="max-w-md mx-auto space-y-6 pt-8">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => setCurrentView("survey")}>
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Mi Perfil</h1>
-              <p className="text-muted-foreground">Configuración y recordatorios</p>
-            </div>
+                )}
+              </TabsContent>
+            </Tabs>
           </div>
 
-          {/* Comprehensive Reminder System */}
-          <ReminderSystem />
+          {/* Right Column - Perfil (Always visible) */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <User className="w-5 h-5 text-primary" />
+                  <CardTitle className="text-lg">Mi Perfil</CardTitle>
+                </div>
+                <CardDescription>Configuración y recordatorios</CardDescription>
+              </CardHeader>
+            </Card>
+
+            {/* Comprehensive Reminder System */}
+            <ReminderSystem />
+          </div>
         </div>
       </div>
-    )
-  }
-
-  return null
+    </div>
+  )
 }

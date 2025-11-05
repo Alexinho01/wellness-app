@@ -221,13 +221,13 @@ const supportResources: SupportResource[] = [
 const emergencyResources = [
   {
     name: "Línea de Crisis 24/7",
-    phone: "*4141",
+    phone: "106",
     description: "Atención inmediata en crisis emocionales",
   },
   {
     name: "Chat de Apoyo",
-    phone: "WhatsApp: +569 3710 0023",
-    description: "Atención en línea de sicólogos a través de whatsapp.",
+    phone: "WhatsApp: +57 300 754 8933",
+    description: "Apoyo psicológico vía chat",
   },
 ]
 
