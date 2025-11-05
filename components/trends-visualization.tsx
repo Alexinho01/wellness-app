@@ -18,7 +18,7 @@ interface TrendsProps {
 
 const metricConfig = {
   mood: {
-    label: "Estado Emocional",
+    label: "Estado de ánimo",
     icon: Heart,
     color: "#8b5cf6",
     bgColor: "bg-purple-100 dark:bg-purple-900/20",
@@ -118,7 +118,7 @@ export function WeeklyTrends({ entries }: TrendsProps) {
                 strokeWidth={2}
                 dot={{ fill: metricConfig.mood.color, strokeWidth: 2, r: 4 }}
                 connectNulls={false}
-                name="Estado Emocional"
+                name="Estado de ánimo"
               />
               <Line
                 type="monotone"

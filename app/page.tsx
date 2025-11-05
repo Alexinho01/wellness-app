@@ -199,7 +199,7 @@ export default function WellnessApp() {
                         value={todayEntry.mood}
                         onChange={(value) => setTodayEntry({ ...todayEntry, mood: value })}
                         icon={Heart}
-                        title="Estado emocional"
+                        title="Estado de ánimo"
                         lowLabel="Mal"
                         highLabel="Excelente"
                       />
