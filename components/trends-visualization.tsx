@@ -1,6 +1,8 @@
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Heart, Battery, Moon, Zap, TrendingUp, TrendingDown, Minus, Calendar, BarChart3 } from "lucide-react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import { Button } from "@/components/ui/button"
 
 interface DailyEntry {
   id: string
@@ -71,6 +73,25 @@ export function WeeklyTrends({ entries }: TrendsProps) {
 
   const hasData = weeklyData.some((d) => d.mood !== null)
 
+  const [visibleMetrics, setVisibleMetrics] = useState<Set<string>>(new Set(["mood", "energy", "sleep", "stress"]))
+
+  const toggleMetric = (metric: string) => {
+    const newVisible = new Set(visibleMetrics)
+    if (newVisible.has(metric)) {
+      // Don't allow deselecting all metrics
+      if (newVisible.size > 1) {
+        newVisible.delete(metric)
+      }
+    } else {
+      newVisible.add(metric)
+    }
+    setVisibleMetrics(newVisible)
+  }
+
+  const selectAllMetrics = () => {
+    setVisibleMetrics(new Set(["mood", "energy", "sleep", "stress"]))
+  }
+
   if (!hasData) {
     return (
       <Card>
@@ -96,6 +117,43 @@ export function WeeklyTrends({ entries }: TrendsProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        <div className="mb-4 space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">Filtrar tendencias:</p>
+            <Button variant="ghost" size="sm" onClick={selectAllMetrics} className="h-7 text-xs">
+              Mostrar todas
+            </Button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(metricConfig).map(([key, config]) => {
+              const Icon = config.icon
+              const isActive = visibleMetrics.has(key)
+
+              return (
+                <Button
+                  key={key}
+                  variant={isActive ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => toggleMetric(key)}
+                  className="h-8 gap-2"
+                  style={
+                    isActive
+                      ? {
+                          backgroundColor: config.color,
+                          borderColor: config.color,
+                          color: "white",
+                        }
+                      : {}
+                  }
+                >
+                  <Icon className="w-3 h-3" />
+                  <span className="text-xs">{config.label}</span>
+                </Button>
+              )
+            })}
+          </div>
+        </div>
+
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={weeklyData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -111,42 +169,50 @@ export function WeeklyTrends({ entries }: TrendsProps) {
                 }}
                 labelStyle={{ color: "hsl(var(--foreground))" }}
               />
-              <Line
-                type="monotone"
-                dataKey="mood"
-                stroke={metricConfig.mood.color}
-                strokeWidth={2}
-                dot={{ fill: metricConfig.mood.color, strokeWidth: 2, r: 4 }}
-                connectNulls={false}
-                name="Estado de ánimo"
-              />
-              <Line
-                type="monotone"
-                dataKey="energy"
-                stroke={metricConfig.energy.color}
-                strokeWidth={2}
-                dot={{ fill: metricConfig.energy.color, strokeWidth: 2, r: 4 }}
-                connectNulls={false}
-                name="Energía"
-              />
-              <Line
-                type="monotone"
-                dataKey="sleep"
-                stroke={metricConfig.sleep.color}
-                strokeWidth={2}
-                dot={{ fill: metricConfig.sleep.color, strokeWidth: 2, r: 4 }}
-                connectNulls={false}
-                name="Sueño"
-              />
-              <Line
-                type="monotone"
-                dataKey="stress"
-                stroke={metricConfig.stress.color}
-                strokeWidth={2}
-                dot={{ fill: metricConfig.stress.color, strokeWidth: 2, r: 4 }}
-                connectNulls={false}
-                name="Estrés (invertido)"
-              />
+              {visibleMetrics.has("mood") && (
+                <Line
+                  type="monotone"
+                  dataKey="mood"
+                  stroke={metricConfig.mood.color}
+                  strokeWidth={2}
+                  dot={{ fill: metricConfig.mood.color, strokeWidth: 2, r: 4 }}
+                  connectNulls={false}
+                  name="Estado de ánimo"
+                />
+              )}
+              {visibleMetrics.has("energy") && (
+                <Line
+                  type="monotone"
+                  dataKey="energy"
+                  stroke={metricConfig.energy.color}
+                  strokeWidth={2}
+                  dot={{ fill: metricConfig.energy.color, strokeWidth: 2, r: 4 }}
+                  connectNulls={false}
+                  name="Energía"
+                />
+              )}
+              {visibleMetrics.has("sleep") && (
+                <Line
+                  type="monotone"
+                  dataKey="sleep"
+                  stroke={metricConfig.sleep.color}
+                  strokeWidth={2}
+                  dot={{ fill: metricConfig.sleep.color, strokeWidth: 2, r: 4 }}
+                  connectNulls={false}
+                  name="Sueño"
+                />
+              )}
+              {visibleMetrics.has("stress") && (
+                <Line
+                  type="monotone"
+                  dataKey="stress"
+                  stroke={metricConfig.stress.color}
+                  strokeWidth={2}
+                  dot={{ fill: metricConfig.stress.color, strokeWidth: 2, r: 4 }}
+                  connectNulls={false}
+                  name="Estrés (invertido)"
+                />
+              )}
             </LineChart>
           </ResponsiveContainer>
         </div>
